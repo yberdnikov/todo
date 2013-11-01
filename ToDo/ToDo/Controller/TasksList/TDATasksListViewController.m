@@ -61,6 +61,9 @@ static NSString *cellIdentifier = @"taskCell";
         return;
 	}
     
+    UIBarButtonItem *editButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemEdit target:self action:@selector(editButtonPressed:)];
+    self.navigationItem.rightBarButtonItem = editButton;
+    
     self.contentDataSource = [[NSMutableArray alloc] initWithArray:self.fetchedResultController.fetchedObjects];
     [self.contentTableView reloadData];
 }
@@ -147,6 +150,18 @@ static NSString *cellIdentifier = @"taskCell";
     return _fetchedResultController;
 }
 
+#pragma mark - UIBarButton selectors
+
+- (void)editButtonPressed:(UIBarButtonItem *)sender
+{
+    if (self.contentTableView.editing)
+        self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemEdit target:self action:@selector(editButtonPressed:)];
+    else
+        self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(editButtonPressed:)];
+    
+    [self.contentTableView setEditing:!self.contentTableView.editing animated:YES];
+}
+
 #pragma mark - Table view data source
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
@@ -156,6 +171,8 @@ static NSString *cellIdentifier = @"taskCell";
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
+    self.navigationItem.rightBarButtonItem.enabled = (self.contentDataSource.count > 0);
+
     return self.contentDataSource.count;
 }
 
@@ -175,21 +192,20 @@ static NSString *cellIdentifier = @"taskCell";
     return cell;
 }
 
-#pragma mark - Table view delegate
-
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+- (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    return YES;
+}
+
+- (void) tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)sourceIndexPath toIndexPath:(NSIndexPath *)destinationIndexPath
+{
+    NSInteger sourceRow = sourceIndexPath.row;
+    NSInteger destRow = destinationIndexPath.row;
     
-}
-
-- (UITableViewCellEditingStyle)tableView:(UITableView *)aTableView editingStyleForRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    return UITableViewCellEditingStyleDelete;
-}
-
-- (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    cell.backgroundColor = [UIColor clearColor];
+    TDATaskEntity *taskEntity = [self.contentDataSource objectAtIndex:sourceRow];
+    
+    [self.contentDataSource removeObjectAtIndex:sourceRow];
+    [self.contentDataSource insertObject:taskEntity atIndex:destRow];
 }
 
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
@@ -215,6 +231,23 @@ static NSString *cellIdentifier = @"taskCell";
                                                   otherButtonTitles:nil];
         [alertView show];
     }
+}
+
+#pragma mark - Table view delegate
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    
+}
+
+- (UITableViewCellEditingStyle)tableView:(UITableView *)aTableView editingStyleForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return UITableViewCellEditingStyleDelete;
+}
+
+- (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    cell.backgroundColor = [UIColor clearColor];
 }
 
 #pragma mark - UITextField delegate methods
