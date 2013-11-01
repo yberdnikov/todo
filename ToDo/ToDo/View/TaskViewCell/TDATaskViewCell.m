@@ -74,6 +74,7 @@
     _taskTitleLabel.font = TASK_CELL_TITLE_FONT;
     _taskTitleLabel.backgroundColor = [UIColor clearColor];
     _taskTitleLabel.textColor = [UIColor darkGrayColor];
+    _taskTitleLabel.highlightedTextColor = [UIColor whiteColor];
     
     return _taskTitleLabel;
 }
