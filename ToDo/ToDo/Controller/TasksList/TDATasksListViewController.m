@@ -21,6 +21,7 @@ static NSString *cellIdentifier = @"taskCell";
 @property (nonatomic, strong) UITableView *contentTableView;
 @property (nonatomic, strong) NSMutableArray *contentDataSource;
 
+@property (nonatomic, assign) NSInteger maxOrderingIndex;
 @property (nonatomic, strong) NSManagedObjectContext *managedObjectContext;
 @property (nonatomic, strong) NSFetchedResultsController *fetchedResultController;
 
@@ -136,8 +137,9 @@ static NSString *cellIdentifier = @"taskCell";
     NSEntityDescription *entity = [NSEntityDescription entityForName:@"Task" inManagedObjectContext:self.managedObjectContext];
     [fetchRequest setEntity:entity];
     
-    NSSortDescriptor *sort = [[NSSortDescriptor alloc] initWithKey:@"modifiedDate" ascending:NO];
-    [fetchRequest setSortDescriptors:[NSArray arrayWithObject:sort]];
+    NSSortDescriptor *sortByDate = [[NSSortDescriptor alloc] initWithKey:@"modifiedDate" ascending:NO];
+    //NSSortDescriptor *sortByOrdering = [[NSSortDescriptor alloc] initWithKey:@"ordering" ascending:NO];
+    [fetchRequest setSortDescriptors:@[sortByDate]];
     
     [fetchRequest setFetchBatchSize:20];
     
@@ -231,6 +233,8 @@ static NSString *cellIdentifier = @"taskCell";
                                                   otherButtonTitles:nil];
         [alertView show];
     }
+    
+    self.maxOrderingIndex = [[self.contentDataSource valueForKeyPath:@"@max.ordering"] integerValue];
 }
 
 #pragma mark - Table view delegate
@@ -264,6 +268,7 @@ static NSString *cellIdentifier = @"taskCell";
     task.title = textField.text;
     task.createdDate = [NSDate date];
     task.modifiedDate = task.createdDate;
+    task.ordering = @(++self.maxOrderingIndex);
     
     NSError *error = nil;
     if (![self.managedObjectContext save:&error])
@@ -276,7 +281,7 @@ static NSString *cellIdentifier = @"taskCell";
         [alertView show];
     }
     else
-            [[TDADataContextProxy sharedInstance] saveMainContext];
+        [[TDADataContextProxy sharedInstance] saveMainContext];
     
     textField.text = nil;
     
@@ -319,6 +324,8 @@ static NSString *cellIdentifier = @"taskCell";
             [self.contentTableView insertRowsAtIndexPaths:@[newIndexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
             break;
     }
+    
+    self.maxOrderingIndex = [[self.contentDataSource valueForKeyPath:@"@max.ordering"] integerValue];
 }
 
 - (void)controllerDidChangeContent:(NSFetchedResultsController *)controller

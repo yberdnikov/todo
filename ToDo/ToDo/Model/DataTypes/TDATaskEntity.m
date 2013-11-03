@@ -2,7 +2,7 @@
 //  TDATaskEntity.m
 //  ToDo
 //
-//  Created by Yuriy Berdnikov on 11/1/13.
+//  Created by Yuriy Berdnikov on 03.11.13.
 //  Copyright (c) 2013 Yuriy Berdnikov. All rights reserved.
 //
 
@@ -11,10 +11,11 @@
 
 @implementation TDATaskEntity
 
-@dynamic taskID;
 @dynamic createdDate;
 @dynamic modifiedDate;
-@dynamic title;
 @dynamic resolved;
+@dynamic taskID;
+@dynamic title;
+@dynamic ordering;
 
 @end
