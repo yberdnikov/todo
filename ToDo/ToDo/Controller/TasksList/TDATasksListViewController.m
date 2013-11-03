@@ -67,6 +67,12 @@ static NSString *cellIdentifier = @"taskCell";
     self.navigationItem.rightBarButtonItem = editButton;
     
     self.contentDataSource = [[NSMutableArray alloc] initWithArray:self.fetchedResultController.fetchedObjects];
+    self.maxOrderingIndex = [[self.contentDataSource valueForKeyPath:@"@max.ordering"] integerValue];
+    
+    [self.contentDataSource enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        NSLog(@"%@ - %@\n", [obj title], [obj ordering]);
+    }];
+    
     [self.contentTableView reloadData];
 }
 
@@ -138,8 +144,8 @@ static NSString *cellIdentifier = @"taskCell";
     [fetchRequest setEntity:entity];
     
     NSSortDescriptor *sortByDate = [[NSSortDescriptor alloc] initWithKey:@"modifiedDate" ascending:NO];
-    //NSSortDescriptor *sortByOrdering = [[NSSortDescriptor alloc] initWithKey:@"ordering" ascending:NO];
-    [fetchRequest setSortDescriptors:@[sortByDate]];
+    NSSortDescriptor *sortByOrdering = [[NSSortDescriptor alloc] initWithKey:@"ordering" ascending:YES];
+    [fetchRequest setSortDescriptors:@[sortByOrdering, sortByDate]];
     
     [fetchRequest setFetchBatchSize:20];
     
@@ -208,6 +214,10 @@ static NSString *cellIdentifier = @"taskCell";
     
     [self.contentDataSource removeObjectAtIndex:sourceRow];
     [self.contentDataSource insertObject:taskEntity atIndex:destRow];
+    
+    taskEntity.ordering = @(destRow);
+    taskEntity.modifiedDate = [NSDate date];
+    [self.managedObjectContext save:nil];
 }
 
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
