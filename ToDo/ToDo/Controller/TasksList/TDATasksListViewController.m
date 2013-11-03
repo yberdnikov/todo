@@ -9,8 +9,8 @@
 #import "TDATasksListViewController.h"
 #import "TDATaskViewCell.h"
 #import "TDATaskEntity.h"
-#import "TDAAppDelegate.h"
 #import "TDATaskEntity+CellElementsLayout.h"
+#import "TDADataContextProxy.h"
 
 static NSString *cellIdentifier = @"taskCell";
 
@@ -44,7 +44,7 @@ static NSString *cellIdentifier = @"taskCell";
     
     self.title = NSLocalizedString(@"Tasks List", nil);
     
-    self.managedObjectContext = [(TDAAppDelegate *)[UIApplication sharedApplication].delegate managedObjectContext];
+    self.managedObjectContext = [[TDADataContextProxy sharedInstance] createManagedObjectContext];
     
     [self.contentTableView registerClass:[TDATaskViewCell class] forCellReuseIdentifier:cellIdentifier];
     
@@ -62,6 +62,7 @@ static NSString *cellIdentifier = @"taskCell";
 	}
     
     UIBarButtonItem *editButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemEdit target:self action:@selector(editButtonPressed:)];
+    
     self.navigationItem.rightBarButtonItem = editButton;
     
     self.contentDataSource = [[NSMutableArray alloc] initWithArray:self.fetchedResultController.fetchedObjects];
@@ -130,7 +131,6 @@ static NSString *cellIdentifier = @"taskCell";
 {
     if (_fetchedResultController)
         return _fetchedResultController;
-    
     
     NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
     NSEntityDescription *entity = [NSEntityDescription entityForName:@"Task" inManagedObjectContext:self.managedObjectContext];
@@ -275,6 +275,8 @@ static NSString *cellIdentifier = @"taskCell";
                                                   otherButtonTitles:nil];
         [alertView show];
     }
+    else
+            [[TDADataContextProxy sharedInstance] saveMainContext];
     
     textField.text = nil;
     

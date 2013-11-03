@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		740401921826BACD00547100 /* TDATasksSyncManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 740401911826BACD00547100 /* TDATasksSyncManager.m */; };
+		740401951826BBFF00547100 /* TDADataContextProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 740401941826BBFF00547100 /* TDADataContextProxy.m */; };
+		740401981826D1A100547100 /* TDAJSONDataParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 740401971826D1A100547100 /* TDAJSONDataParser.m */; };
 		744D5F3F1823D02700EFD3B9 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 744D5F3E1823D02700EFD3B9 /* Foundation.framework */; };
 		744D5F411823D02700EFD3B9 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 744D5F401823D02700EFD3B9 /* CoreGraphics.framework */; };
 		744D5F431823D02700EFD3B9 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 744D5F421823D02700EFD3B9 /* UIKit.framework */; };
@@ -39,6 +42,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		740401901826BACD00547100 /* TDATasksSyncManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TDATasksSyncManager.h; sourceTree = "<group>"; };
+		740401911826BACD00547100 /* TDATasksSyncManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TDATasksSyncManager.m; sourceTree = "<group>"; };
+		740401931826BBFF00547100 /* TDADataContextProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TDADataContextProxy.h; sourceTree = "<group>"; };
+		740401941826BBFF00547100 /* TDADataContextProxy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TDADataContextProxy.m; sourceTree = "<group>"; };
+		740401961826D1A100547100 /* TDAJSONDataParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TDAJSONDataParser.h; sourceTree = "<group>"; };
+		740401971826D1A100547100 /* TDAJSONDataParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TDAJSONDataParser.m; sourceTree = "<group>"; };
 		744D5F3B1823D02700EFD3B9 /* ToDo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ToDo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		744D5F3E1823D02700EFD3B9 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		744D5F401823D02700EFD3B9 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -191,6 +200,12 @@
 			children = (
 				744D5F7D1823D4E700EFD3B9 /* DataModel */,
 				744D5F7E1823D4E700EFD3B9 /* DataTypes */,
+				740401901826BACD00547100 /* TDATasksSyncManager.h */,
+				740401911826BACD00547100 /* TDATasksSyncManager.m */,
+				740401931826BBFF00547100 /* TDADataContextProxy.h */,
+				740401941826BBFF00547100 /* TDADataContextProxy.m */,
+				740401961826D1A100547100 /* TDAJSONDataParser.h */,
+				740401971826D1A100547100 /* TDAJSONDataParser.m */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -341,8 +356,11 @@
 				744D5F851823D52900EFD3B9 /* TDADataModel.xcdatamodeld in Sources */,
 				744D5F4F1823D02700EFD3B9 /* TDAAppDelegate.m in Sources */,
 				744D5F7A1823D0C400EFD3B9 /* TDATasksListViewController.m in Sources */,
+				740401951826BBFF00547100 /* TDADataContextProxy.m in Sources */,
 				744D5F911823E78600EFD3B9 /* TDATaskEntity+CellElementsLayout.m in Sources */,
+				740401981826D1A100547100 /* TDAJSONDataParser.m in Sources */,
 				744D5F8B1823E12D00EFD3B9 /* TDATaskEntity.m in Sources */,
+				740401921826BACD00547100 /* TDATasksSyncManager.m in Sources */,
 				744D5F4B1823D02700EFD3B9 /* main.m in Sources */,
 				744D5F821823D50A00EFD3B9 /* TDATaskViewCell.m in Sources */,
 			);
@@ -549,6 +567,7 @@
 				744D5F6F1823D02700EFD3B9 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		744D5F701823D02700EFD3B9 /* Build configuration list for PBXNativeTarget "ToDoTests" */ = {
 			isa = XCConfigurationList;
@@ -557,6 +576,7 @@
 				744D5F721823D02700EFD3B9 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 
