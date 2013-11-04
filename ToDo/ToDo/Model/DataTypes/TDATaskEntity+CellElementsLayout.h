@@ -8,7 +8,8 @@
 
 #import "TDATaskEntity.h"
 
-#define TASK_CELL_TITLE_PADDING 10.0f
+#define TASK_CELL_CHECKBOX_SIDE_SIZE 30.0f
+#define TASK_CELL_TITLE_PADDING 5.0f
 #define TASK_CELL_TITLE_FONT [UIFont fontWithName:@"HelveticaNeue-Light" size:16.0f]
 
 @interface TDATaskEntity (CellElementsLayout)

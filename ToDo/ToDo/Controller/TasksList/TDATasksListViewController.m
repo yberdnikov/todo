@@ -19,9 +19,8 @@ static NSString *cellIdentifier = @"taskCell";
 @property (nonatomic, strong) UITextField *newTaskTextField;
 
 @property (nonatomic, strong) UITableView *contentTableView;
-@property (nonatomic, strong) NSMutableArray *contentDataSource;
+@property (nonatomic, assign) BOOL ignoreUpdates;
 
-@property (nonatomic, assign) NSInteger maxOrderingIndex;
 @property (nonatomic, strong) NSManagedObjectContext *managedObjectContext;
 @property (nonatomic, strong) NSFetchedResultsController *fetchedResultController;
 
@@ -65,15 +64,6 @@ static NSString *cellIdentifier = @"taskCell";
     UIBarButtonItem *editButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemEdit target:self action:@selector(editButtonPressed:)];
     
     self.navigationItem.rightBarButtonItem = editButton;
-    
-    self.contentDataSource = [[NSMutableArray alloc] initWithArray:self.fetchedResultController.fetchedObjects];
-    self.maxOrderingIndex = [[self.contentDataSource valueForKeyPath:@"@max.ordering"] integerValue];
-    
-    [self.contentDataSource enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-        NSLog(@"%@ - %@\n", [obj title], [obj ordering]);
-    }];
-    
-    [self.contentTableView reloadData];
 }
 
 - (void)didReceiveMemoryWarning
@@ -86,7 +76,6 @@ static NSString *cellIdentifier = @"taskCell";
 {
     self.newTaskTextField = nil;
     self.contentTableView = nil;
-    self.contentDataSource = nil;
     self.managedObjectContext = nil;
     self.fetchedResultController = nil;
 }
@@ -179,14 +168,15 @@ static NSString *cellIdentifier = @"taskCell";
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    self.navigationItem.rightBarButtonItem.enabled = (self.contentDataSource.count > 0);
+    NSInteger count = self.fetchedResultController.fetchedObjects.count;
+    self.navigationItem.rightBarButtonItem.enabled = (count > 0);
 
-    return self.contentDataSource.count;
+    return count;
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    TDATaskEntity *taskEntity = [self.contentDataSource objectAtIndex:indexPath.row];
+    TDATaskEntity *taskEntity = [self.fetchedResultController objectAtIndexPath:indexPath];
     
     return [taskEntity cellOptimalHeightWithWidth:CGRectGetWidth(tableView.bounds)];
 }
@@ -195,7 +185,7 @@ static NSString *cellIdentifier = @"taskCell";
 {
     TDATaskViewCell *cell = [tableView dequeueReusableCellWithIdentifier:cellIdentifier];
     
-    cell.taskEntity = [self.contentDataSource objectAtIndex:indexPath.row];
+    cell.taskEntity = [self.fetchedResultController objectAtIndexPath:indexPath];
     
     return cell;
 }
@@ -205,19 +195,29 @@ static NSString *cellIdentifier = @"taskCell";
     return YES;
 }
 
-- (void) tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)sourceIndexPath toIndexPath:(NSIndexPath *)destinationIndexPath
+- (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)sourceIndexPath toIndexPath:(NSIndexPath *)destinationIndexPath
 {
     NSInteger sourceRow = sourceIndexPath.row;
     NSInteger destRow = destinationIndexPath.row;
     
-    TDATaskEntity *taskEntity = [self.contentDataSource objectAtIndex:sourceRow];
+    if (sourceRow == destRow)
+		return;
     
-    [self.contentDataSource removeObjectAtIndex:sourceRow];
-    [self.contentDataSource insertObject:taskEntity atIndex:destRow];
+    self.ignoreUpdates = YES;
     
-    taskEntity.ordering = @(destRow);
-    taskEntity.modifiedDate = [NSDate date];
-    [self.managedObjectContext save:nil];
+    NSMutableArray *tasks = [self.fetchedResultController.fetchedObjects mutableCopy];
+	TDATaskEntity *taskToMove = [tasks objectAtIndex:sourceRow];
+	[tasks removeObject:taskToMove];
+	[tasks insertObject:taskToMove atIndex:destRow];
+	
+    [tasks enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        [obj setOrdering:@(idx)];
+    }];
+    
+	[self.managedObjectContext save:nil];
+    [[TDADataContextProxy sharedInstance] saveMainContext];
+    
+    self.ignoreUpdates = NO;
 }
 
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
@@ -230,7 +230,7 @@ static NSString *cellIdentifier = @"taskCell";
     if (editingStyle != UITableViewCellEditingStyleDelete)
         return;
     
-    TDATaskEntity *taskToDelete = [self.contentDataSource objectAtIndex:indexPath.row];
+    TDATaskEntity *taskToDelete = [self.fetchedResultController objectAtIndexPath:indexPath];
     [self.managedObjectContext deleteObject:taskToDelete];
     
     NSError *error = nil;
@@ -243,8 +243,6 @@ static NSString *cellIdentifier = @"taskCell";
                                                   otherButtonTitles:nil];
         [alertView show];
     }
-    
-    self.maxOrderingIndex = [[self.contentDataSource valueForKeyPath:@"@max.ordering"] integerValue];
 }
 
 #pragma mark - Table view delegate
@@ -278,7 +276,6 @@ static NSString *cellIdentifier = @"taskCell";
     task.title = textField.text;
     task.createdDate = [NSDate date];
     task.modifiedDate = task.createdDate;
-    task.ordering = @(++self.maxOrderingIndex);
     
     NSError *error = nil;
     if (![self.managedObjectContext save:&error])
@@ -302,6 +299,9 @@ static NSString *cellIdentifier = @"taskCell";
 
 - (void)controllerWillChangeContent:(NSFetchedResultsController *)controller
 {
+    if (self.ignoreUpdates)
+        return;
+    
     [self.contentTableView beginUpdates];
 }
 
@@ -311,35 +311,35 @@ static NSString *cellIdentifier = @"taskCell";
      forChangeType:(NSFetchedResultsChangeType)type
       newIndexPath:(NSIndexPath *)newIndexPath
 {
+    if (self.ignoreUpdates)
+        return;
+    
     switch (type)
     {
         case NSFetchedResultsChangeInsert:
-            [self.contentDataSource insertObject:anObject atIndex:indexPath.row];
             [self.contentTableView insertRowsAtIndexPaths:@[newIndexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
             break;
             
         case NSFetchedResultsChangeDelete:
-            [self.contentDataSource removeObject:anObject];
             [self.contentTableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
             break;
             
         case NSFetchedResultsChangeUpdate:
-            //[self configureCell:[tableView cellForRowAtIndexPath:indexPath] atIndexPath:indexPath];
+            [self.contentTableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
             break;
             
         case NSFetchedResultsChangeMove:
-            [self.contentDataSource removeObjectAtIndex:indexPath.row];
-            [self.contentDataSource insertObject:anObject atIndex:newIndexPath.row];
             [self.contentTableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
             [self.contentTableView insertRowsAtIndexPaths:@[newIndexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
             break;
     }
-    
-    self.maxOrderingIndex = [[self.contentDataSource valueForKeyPath:@"@max.ordering"] integerValue];
 }
 
 - (void)controllerDidChangeContent:(NSFetchedResultsController *)controller
 {
+    if (self.ignoreUpdates)
+        return;
+    
     [self.contentTableView endUpdates];
 }
 

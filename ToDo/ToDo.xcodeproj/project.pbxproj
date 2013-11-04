@@ -29,6 +29,10 @@
 		744D5F851823D52900EFD3B9 /* TDADataModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 744D5F831823D52900EFD3B9 /* TDADataModel.xcdatamodeld */; };
 		744D5F8E1823E70500EFD3B9 /* UIView+FrameAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 744D5F8D1823E70500EFD3B9 /* UIView+FrameAdditions.m */; };
 		744D5F911823E78600EFD3B9 /* TDATaskEntity+CellElementsLayout.m in Sources */ = {isa = PBXBuildFile; fileRef = 744D5F901823E78600EFD3B9 /* TDATaskEntity+CellElementsLayout.m */; };
+		74A2C8BB1827B48D00DBFFBB /* checkbox_off.png in Resources */ = {isa = PBXBuildFile; fileRef = 74A2C8B71827B48D00DBFFBB /* checkbox_off.png */; };
+		74A2C8BC1827B48D00DBFFBB /* checkbox_off@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 74A2C8B81827B48D00DBFFBB /* checkbox_off@2x.png */; };
+		74A2C8BD1827B48D00DBFFBB /* checkbox_on.png in Resources */ = {isa = PBXBuildFile; fileRef = 74A2C8B91827B48D00DBFFBB /* checkbox_on.png */; };
+		74A2C8BE1827B48D00DBFFBB /* checkbox_on@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 74A2C8BA1827B48D00DBFFBB /* checkbox_on@2x.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -76,6 +80,10 @@
 		744D5F8D1823E70500EFD3B9 /* UIView+FrameAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+FrameAdditions.m"; sourceTree = "<group>"; };
 		744D5F8F1823E78600EFD3B9 /* TDATaskEntity+CellElementsLayout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "TDATaskEntity+CellElementsLayout.h"; sourceTree = "<group>"; };
 		744D5F901823E78600EFD3B9 /* TDATaskEntity+CellElementsLayout.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "TDATaskEntity+CellElementsLayout.m"; sourceTree = "<group>"; };
+		74A2C8B71827B48D00DBFFBB /* checkbox_off.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = checkbox_off.png; sourceTree = "<group>"; };
+		74A2C8B81827B48D00DBFFBB /* checkbox_off@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "checkbox_off@2x.png"; sourceTree = "<group>"; };
+		74A2C8B91827B48D00DBFFBB /* checkbox_on.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = checkbox_on.png; sourceTree = "<group>"; };
+		74A2C8BA1827B48D00DBFFBB /* checkbox_on@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "checkbox_on@2x.png"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -144,6 +152,7 @@
 				744D5F4D1823D02700EFD3B9 /* TDAAppDelegate.h */,
 				744D5F4E1823D02700EFD3B9 /* TDAAppDelegate.m */,
 				744D5F561823D02700EFD3B9 /* Images.xcassets */,
+				74A2C8B51827B48D00DBFFBB /* Resourses */,
 				744D5F451823D02700EFD3B9 /* Supporting Files */,
 			);
 			path = ToDo;
@@ -255,6 +264,25 @@
 			path = TaskViewCell;
 			sourceTree = "<group>";
 		};
+		74A2C8B51827B48D00DBFFBB /* Resourses */ = {
+			isa = PBXGroup;
+			children = (
+				74A2C8B61827B48D00DBFFBB /* Images */,
+			);
+			path = Resourses;
+			sourceTree = "<group>";
+		};
+		74A2C8B61827B48D00DBFFBB /* Images */ = {
+			isa = PBXGroup;
+			children = (
+				74A2C8B71827B48D00DBFFBB /* checkbox_off.png */,
+				74A2C8B81827B48D00DBFFBB /* checkbox_off@2x.png */,
+				74A2C8B91827B48D00DBFFBB /* checkbox_on.png */,
+				74A2C8BA1827B48D00DBFFBB /* checkbox_on@2x.png */,
+			);
+			path = Images;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -332,7 +360,11 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				74A2C8BD1827B48D00DBFFBB /* checkbox_on.png in Resources */,
 				744D5F571823D02700EFD3B9 /* Images.xcassets in Resources */,
+				74A2C8BE1827B48D00DBFFBB /* checkbox_on@2x.png in Resources */,
+				74A2C8BC1827B48D00DBFFBB /* checkbox_off@2x.png in Resources */,
+				74A2C8BB1827B48D00DBFFBB /* checkbox_off.png in Resources */,
 				744D5F491823D02700EFD3B9 /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -20,10 +20,15 @@
 - (CGFloat)cellOptimalHeightWithWidth:(CGFloat)maxWidth
 {
     CGFloat cellHeight = TASK_CELL_TITLE_PADDING; //top padding
-    
-    cellHeight += [self titleLabelOptimalHeightWithWidth:maxWidth];
-    
+    cellHeight += TASK_CELL_CHECKBOX_SIDE_SIZE; //checkbox
     cellHeight += TASK_CELL_TITLE_PADDING; //bottom padding
+    
+    CGFloat titleHeight = [self titleLabelOptimalHeightWithWidth:maxWidth - TASK_CELL_CHECKBOX_SIDE_SIZE - TASK_CELL_TITLE_PADDING * 2];
+    
+    // if title height is more then default cell height - increase cell height
+    // title has top offset TASK_CELL_TITLE_PADDING * 2
+    if (titleHeight > (TASK_CELL_CHECKBOX_SIDE_SIZE - TASK_CELL_TITLE_PADDING))
+        cellHeight += (titleHeight - (TASK_CELL_CHECKBOX_SIDE_SIZE - TASK_CELL_TITLE_PADDING));
     
     return cellHeight;
 }
