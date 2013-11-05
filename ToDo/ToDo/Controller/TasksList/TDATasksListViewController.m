@@ -72,6 +72,14 @@ static NSString *cellIdentifier = @"taskCell";
                                                object:[[TDADataContextProxy sharedInstance] mainManagedObjectContext]];
 }
 
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    
+    // for iOS 6 - adjust size of tableView because of navigationBar
+    self.contentTableView.frame = self.view.bounds;
+}
+
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
