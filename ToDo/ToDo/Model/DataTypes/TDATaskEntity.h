@@ -2,7 +2,7 @@
 //  TDATaskEntity.h
 //  ToDo
 //
-//  Created by Yuriy Berdnikov on 03.11.13.
+//  Created by Yuriy Berdnikov on 11/4/13.
 //  Copyright (c) 2013 Yuriy Berdnikov. All rights reserved.
 //
 
@@ -14,9 +14,10 @@
 
 @property (nonatomic, retain) NSDate * createdDate;
 @property (nonatomic, retain) NSDate * modifiedDate;
+@property (nonatomic, retain) NSNumber * ordering;
 @property (nonatomic, retain) NSNumber * resolved;
 @property (nonatomic, retain) NSString * taskID;
 @property (nonatomic, retain) NSString * title;
-@property (nonatomic, retain) NSNumber * ordering;
+@property (nonatomic, retain) NSNumber * syncState;
 
 @end

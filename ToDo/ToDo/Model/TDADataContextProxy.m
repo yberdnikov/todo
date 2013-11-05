@@ -11,7 +11,7 @@
 
 @interface TDADataContextProxy ()
 
-@property (nonatomic, strong) NSManagedObjectContext *mainManagedObjectContext; // saving to store without bloking UI
+@property (nonatomic, strong, readwrite) NSManagedObjectContext *mainManagedObjectContext; // saving to store without bloking UI
 @property (nonatomic, strong, readwrite) NSManagedObjectContext *backgroundQueueManagedObjectContext;
 @property (nonatomic, strong) NSManagedObjectModel *managedObjectModel;
 @property (nonatomic, strong) NSPersistentStoreCoordinator *persistentStoreCoordinator;
@@ -58,10 +58,7 @@
     
     _persistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:[self managedObjectModel]];
     if (![_persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:storeUrl options:options error:&error])
-    {
-        /*Error for store creation should be handled in here*/
         NSAssert(NO, error.localizedDescription);
-    }
     
     return _persistentStoreCoordinator;
 }

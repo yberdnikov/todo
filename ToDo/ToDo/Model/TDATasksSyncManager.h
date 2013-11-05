@@ -8,6 +8,12 @@
 
 #import <Foundation/Foundation.h>
 
+typedef NS_ENUM(NSInteger, TDATaskSyncState) {
+    TDATaskSynced,
+    TDATaskNew,
+    TDATaskDeleted,
+};
+
 @interface TDATasksSyncManager : NSObject
 
 + (instancetype)sharedInstance;

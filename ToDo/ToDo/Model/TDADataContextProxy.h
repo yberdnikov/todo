@@ -10,6 +10,7 @@
 
 @interface TDADataContextProxy : NSObject
 
+@property (nonatomic, strong, readonly) NSManagedObjectContext *mainManagedObjectContext; // saving to store without bloking UI
 @property (nonatomic, strong, readonly) NSManagedObjectContext *backgroundQueueManagedObjectContext; //uses for sync data with server
 
 + (instancetype)sharedInstance;

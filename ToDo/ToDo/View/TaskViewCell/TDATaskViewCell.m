@@ -9,6 +9,7 @@
 #import "TDATaskViewCell.h"
 #import "UIView+FrameAdditions.h"
 #import "TDATaskEntity+CellElementsLayout.h"
+#import "TDADataContextProxy.h"
 
 @interface TDATaskViewCell ()
 
@@ -49,16 +50,7 @@
     [super layoutSubviews];
     
     self.taskTitleLabel.width = CGRectGetWidth(self.contentView.bounds) - TASK_CELL_TITLE_PADDING * 2 - TASK_CELL_CHECKBOX_SIDE_SIZE;
-    
-    if (!self.isEditing)
-        self.taskTitleLabel.height = [self.taskEntity titleLabelOptimalHeightWithWidth:self.taskTitleLabel.width];
-}
-
-- (void)setSelected:(BOOL)selected animated:(BOOL)animated
-{
-    [super setSelected:selected animated:animated];
-
-    // Configure the view for the selected state
+    self.taskTitleLabel.height = [self.taskEntity titleLabelOptimalHeightWithWidth:self.taskTitleLabel.width];
 }
 
 #pragma mark - Properties
@@ -107,9 +99,7 @@
     {
         //cross text
         NSMutableAttributedString *attributeTitle = [[NSMutableAttributedString alloc] initWithString:taskEntity.title];
-        [attributeTitle addAttribute:NSStrikethroughStyleAttributeName
-                               value:@1
-                               range:(NSRange){0, attributeTitle.length}];
+        [attributeTitle addAttribute:NSStrikethroughStyleAttributeName value:@1 range:(NSRange){0, attributeTitle.length}];
         self.taskTitleLabel.attributedText = attributeTitle;
     }
     else
@@ -126,6 +116,14 @@
     self.taskEntity.resolved = @(!self.taskEntity.resolved.boolValue);
     
     [self.taskEntity.managedObjectContext save:nil];
+    
+    [self.taskEntity.managedObjectContext performBlockAndWait:^{
+        NSError *error = nil;
+        if (![self.taskEntity.managedObjectContext save:&error])
+            NSAssert(NO, error.localizedDescription);
+        
+        [[TDADataContextProxy sharedInstance] saveMainContext];
+    }];
 }
 
 @end

@@ -11,6 +11,7 @@
 #import "TDATaskEntity.h"
 #import "TDATaskEntity+CellElementsLayout.h"
 #import "TDADataContextProxy.h"
+#import "TDATasksSyncManager.h"
 
 static NSString *cellIdentifier = @"taskCell";
 
@@ -64,6 +65,11 @@ static NSString *cellIdentifier = @"taskCell";
     UIBarButtonItem *editButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemEdit target:self action:@selector(editButtonPressed:)];
     
     self.navigationItem.rightBarButtonItem = editButton;
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(contextDidSave:)
+                                                 name:NSManagedObjectContextDidSaveNotification
+                                               object:[[TDADataContextProxy sharedInstance] mainManagedObjectContext]];
 }
 
 - (void)didReceiveMemoryWarning
@@ -74,6 +80,10 @@ static NSString *cellIdentifier = @"taskCell";
 
 - (void)dealloc
 {
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:NSManagedObjectContextObjectsDidChangeNotification
+                                                  object:[[TDADataContextProxy sharedInstance] createManagedObjectContext]];
+    
     self.newTaskTextField = nil;
     self.contentTableView = nil;
     self.managedObjectContext = nil;
@@ -135,6 +145,8 @@ static NSString *cellIdentifier = @"taskCell";
     NSSortDescriptor *sortByDate = [[NSSortDescriptor alloc] initWithKey:@"modifiedDate" ascending:NO];
     NSSortDescriptor *sortByOrdering = [[NSSortDescriptor alloc] initWithKey:@"ordering" ascending:YES];
     [fetchRequest setSortDescriptors:@[sortByOrdering, sortByDate]];
+    
+    [fetchRequest setPredicate:[NSPredicate predicateWithFormat:@"syncState != %d", TDATaskDeleted]];
     
     [fetchRequest setFetchBatchSize:20];
     
@@ -214,9 +226,14 @@ static NSString *cellIdentifier = @"taskCell";
         [obj setOrdering:@(idx)];
     }];
     
-	[self.managedObjectContext save:nil];
-    [[TDADataContextProxy sharedInstance] saveMainContext];
-    
+    [self.managedObjectContext performBlockAndWait:^{
+        NSError *error = nil;
+        if (![self.managedObjectContext save:&error])
+            NSAssert(NO, error.localizedDescription);
+        
+        [[TDADataContextProxy sharedInstance] saveMainContext];
+    }];
+
     self.ignoreUpdates = NO;
 }
 
@@ -231,25 +248,29 @@ static NSString *cellIdentifier = @"taskCell";
         return;
     
     TDATaskEntity *taskToDelete = [self.fetchedResultController objectAtIndexPath:indexPath];
-    [self.managedObjectContext deleteObject:taskToDelete];
     
-    NSError *error = nil;
-    if (![self.managedObjectContext save:&error])
+    if (taskToDelete.taskID.length)
     {
-        UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Failed to delete task", nil)
-                                                            message:error.localizedDescription
-                                                           delegate:nil
-                                                  cancelButtonTitle:NSLocalizedString(@"OK", nil)
-                                                  otherButtonTitles:nil];
-        [alertView show];
+        taskToDelete.modifiedDate = [NSDate date];
+        taskToDelete.syncState = @(TDATaskDeleted);
     }
+    else
+        [self.managedObjectContext deleteObject:taskToDelete];
+    
+    [self.managedObjectContext performBlockAndWait:^{
+        NSError *error = nil;
+        if (![self.managedObjectContext save:&error])
+            NSAssert(NO, error.localizedDescription);
+        
+        [[TDADataContextProxy sharedInstance] saveMainContext];
+    }];
 }
 
 #pragma mark - Table view delegate
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
 
 - (UITableViewCellEditingStyle)tableView:(UITableView *)aTableView editingStyleForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -276,19 +297,15 @@ static NSString *cellIdentifier = @"taskCell";
     task.title = textField.text;
     task.createdDate = [NSDate date];
     task.modifiedDate = task.createdDate;
+    task.syncState = @(TDATaskNew);
     
-    NSError *error = nil;
-    if (![self.managedObjectContext save:&error])
-    {
-        UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Failed to create task", nil)
-                                                            message:error.localizedDescription
-                                                           delegate:nil
-                                                  cancelButtonTitle:NSLocalizedString(@"OK", nil)
-                                                  otherButtonTitles:nil];
-        [alertView show];
-    }
-    else
+    [self.managedObjectContext performBlockAndWait:^{
+        NSError *error = nil;
+        if (![self.managedObjectContext save:&error])
+            NSAssert(NO, error.localizedDescription);
+        
         [[TDADataContextProxy sharedInstance] saveMainContext];
+    }];
     
     textField.text = nil;
     
@@ -317,11 +334,11 @@ static NSString *cellIdentifier = @"taskCell";
     switch (type)
     {
         case NSFetchedResultsChangeInsert:
-            [self.contentTableView insertRowsAtIndexPaths:@[newIndexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+            [self.contentTableView insertRowsAtIndexPaths:@[newIndexPath] withRowAnimation:UITableViewRowAnimationFade];
             break;
             
         case NSFetchedResultsChangeDelete:
-            [self.contentTableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+            [self.contentTableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
             break;
             
         case NSFetchedResultsChangeUpdate:
@@ -329,8 +346,8 @@ static NSString *cellIdentifier = @"taskCell";
             break;
             
         case NSFetchedResultsChangeMove:
-            [self.contentTableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
-            [self.contentTableView insertRowsAtIndexPaths:@[newIndexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+            [self.contentTableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
+            [self.contentTableView insertRowsAtIndexPaths:@[newIndexPath] withRowAnimation:UITableViewRowAnimationFade];
             break;
     }
 }
@@ -341,6 +358,18 @@ static NSString *cellIdentifier = @"taskCell";
         return;
     
     [self.contentTableView endUpdates];
+}
+
+#pragma mark - Core data context marging
+
+- (void)contextDidSave:(NSNotification *)notification
+{
+    if (notification.object == self.managedObjectContext)
+        return;
+    
+    [self.managedObjectContext performBlock:^{
+        [self.managedObjectContext mergeChangesFromContextDidSaveNotification:notification];
+    }];
 }
 
 @end
